@@ -30,3 +30,42 @@ curl -s "https://ost.ecosyste.ms/api/v1/issues/openclimateaction?per_page=300" |
       issues: (.issues[:3] | map({uuid, number, title, labels, comments_count, created_at, html_url}))
     })' > data/fixtures/ecosystems-sample.json
 ```
+
+# Positions snapshot
+
+`positions.json` is a copy of `data/positions.json`, the file `pnpm prebuild` generates from the
+public job board APIs of the organizations listed in `data/position-sources.ts`. `pnpm
+prebuild:sample` copies it into place instead of calling the APIs, so PR builds don't send requests
+to the job boards and give the same result on every run. It is also the fallback when a job board
+API is unreachable while the site is built.
+
+It holds the title, the locations, the date and a link to the original posting of every open
+position. No job description is copied.
+
+## License
+
+The postings belong to the organizations that published them, we only publish a link to them.
+[Greenhouse documents its job board API](https://developers.greenhouse.io/job-board.html) as
+public data that needs no authentication, and Ashby and Lever expose the same for the boards they
+host. Every entry links to the organization that posted it.
+
+## Regenerating
+
+The `Refresh Positions Snapshot` workflow does this every hour, and only commits a snapshot that
+was fetched from every board. To do it by hand:
+
+```sh
+pnpm positions:fetch                    # writes data/positions.json from the job board APIs
+cp data/positions.json data/fixtures/positions.json
+```
+
+To check that every board still belongs to the organization we expect it to:
+
+```sh
+pnpm positions:check
+```
+
+A board that publishes no organization name cannot be checked by the script. Those sources say so
+with `nameUnverifiable` in `data/position-sources.ts`, and the check reports them as `??` instead
+of pretending they are verified.
+

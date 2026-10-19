@@ -1,0 +1,55 @@
+name: Refresh Positions Snapshot
+
+on:
+  schedule:
+    # Off the hour, so it doesn't queue behind the deploy.
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Reads the pnpm version from `packageManager` in package.json.
+      - name: Install pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Fetch the positions
+        run: pnpm positions:fetch
+
+      # The snapshot is the fallback for the PR builds and for a build where every board is
+      # down, so it is only refreshed when every board answered.
+      - name: Commit the snapshot
+        run: |
+          failed=$(node -e "console.log(require('./data/positions.json').failedSources.length)")
+          if [ "$failed" != "0" ]; then
+            echo "::warning::$failed job board(s) did not answer, the snapshot is not refreshed."
+            exit 0
+          fi
+          cp data/positions.json data/fixtures/positions.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/fixtures/positions.json
+          if git diff --staged --quiet; then
+            echo "The snapshot did not change."
+            exit 0
+          fi
+          git commit -m "chore: refresh the positions snapshot"
+          git pull --rebase origin main
+          git push

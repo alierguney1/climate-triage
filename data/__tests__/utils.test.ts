@@ -87,7 +87,9 @@ describe("utils", () => {
       const ms = 100;
       await sleep(ms);
       const end = Date.now();
-      expect(end - start).toBeGreaterThanOrEqual(ms);
+      // The timer can fire a fraction of a millisecond early and Date.now() counts whole
+      // milliseconds, so the measured time can be one below the delay.
+      expect(end - start).toBeGreaterThanOrEqual(ms - 1);
     });
   });
 });

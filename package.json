@@ -10,8 +10,10 @@
     "lint:fix": "biome check --write .",
     "typecheck": "tsc --noEmit",
     "prepare": "husky",
-    "prebuild": "tsx data/index.ts",
-    "prebuild:sample": "tsx data/index.ts --sample",
+    "prebuild": "tsx data/index.ts && tsx data/positions-index.ts",
+    "prebuild:sample": "tsx data/index.ts --sample && tsx data/positions-index.ts --sample",
+    "positions:check": "tsx data/positions-index.ts --check",
+    "positions:fetch": "tsx data/positions-index.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },

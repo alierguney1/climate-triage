@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     lastModified
   }));
 
-  const routes = ["", "about"].map((route) => ({
+  const routes = ["", "about", "positions"].map((route) => ({
     url: `${siteUrl}/${route}`,
     lastModified
   }));

@@ -16,9 +16,13 @@ export const extendedSlugify = (text: string): string => {
   });
 };
 
+export const writeJsonFile = async (path: string, data: unknown) => {
+  await fs.writeFile(path, JSON.stringify(data));
+  console.log(`Generated ${path}`);
+};
+
 export const writeDataFile = async (data: Data) => {
-  await fs.writeFile("data/data.json", JSON.stringify(data));
-  console.log("Generated data/data.json");
+  await writeJsonFile("data/data.json", data);
 };
 
 export const chunkArray = <T>(arr: T[], chunkSize: number): T[][] => {

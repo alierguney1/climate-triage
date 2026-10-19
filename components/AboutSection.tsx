@@ -15,6 +15,13 @@ export const AboutSection = () => {
           <strong>Ask the community.</strong>
         </Link>
       </p>
+      <p className="mt-2 text-gray-900 dark:text-silver-500">
+        Working on climate tech and hiring? The{" "}
+        <Link href="/positions" className="text-primary underline">
+          <strong>open positions</strong>
+        </Link>{" "}
+        are collected from the job boards of the organizations themselves.
+      </p>
     </div>
   );
 };
